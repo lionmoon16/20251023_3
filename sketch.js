@@ -11,6 +11,12 @@ let scoreText = ""; // 顯示在畫布上的文字
 let fireworks = []; // 儲存所有煙火物件的陣列
 let fireworkLaunched = false; // 標記是否已啟動煙火動畫
 
+// =================================================================
+// 步驟一：模擬成績數據接收
+// -----------------------------------------------------------------
+
+// ... (其他全域變數保持不動) ...
+
 window.addEventListener('message', function (event) {
     // 監聽來自 H5P iFrame 的分數結果
     const data = event.data;
@@ -18,15 +24,23 @@ window.addEventListener('message', function (event) {
     if (data && data.type === 'H5P_SCORE_RESULT') {
         
         // 更新全域分數變數
-        finalScore = data.score; 
-        maxScore = data.maxScore;
-        // 根據要求，顯示為答對題數
-        scoreText = `答對題數: ${finalScore}/${maxScore}`;
+        let finalScore = data.score; 
+        let maxScore = data.maxScore;
+        let scoreText = `答對題數: ${finalScore}/${maxScore}`;
         
-        // 重置煙火狀態，以便新的分數可以觸發判斷
+        // 重置煙火狀態
         fireworkLaunched = false; 
 
         console.log("新的分數已接收:", scoreText); 
+        
+        // **實現要求二：成績完成後顯示 p5.js 畫面**
+        // 假設 p5.js 畫布的預設 ID 是 'defaultCanvas0'
+        const canvasElement = document.getElementById('defaultCanvas0');
+        if (canvasElement) {
+            // 將 canvas 設為可見 (覆蓋在 H5P 內容之上)
+            canvasElement.style.display = 'block';
+        }
+        // ---------------------------------------------
         
         // 觸發 p5.js 立即重繪
         if (typeof redraw === 'function') {
@@ -40,15 +54,39 @@ window.addEventListener('message', function (event) {
 // 步驟二：p5.js 核心設定與繪圖
 // -----------------------------------------------------------------
 
-function setup() { 
-    // 創建 Canvas 
-    createCanvas(windowWidth / 2, windowHeight / 2); 
-    background(255); 
-    // 預設不重複繪製
+// =================================================================
+// 步驟二：p5.js 核心設定與繪圖
+// -----------------------------------------------------------------
+
+let p5Canvas; // 宣告一個全域變數來儲存 p5.js canvas 元素
+
+function setup() {
+    // 獲取 H5P 容器的大小以決定 Canvas 大小
+    const h5pIframe = document.querySelector('#h5pContainer iframe');
+    const h5pWrapper = document.getElementById('overlayWrapper');
+
+    let w = 600; 
+    let h = 400; 
+    
+    if (h5pWrapper && h5pIframe) {
+        // 獲取容器的實際寬度，並使用 H5P iframe 設定的固定高度
+        w = h5pWrapper.offsetWidth; 
+        h = parseInt(h5pIframe.getAttribute('height')) || 600;
+    } 
+
+    // 建立 canvas
+    p5Canvas = createCanvas(w, h); 
+    
+    // 關鍵：將 canvas 放置到 #overlayWrapper 內，實現重疊效果
+    p5Canvas.parent('overlayWrapper'); 
+
+    colorMode(HSB, 360, 100, 100, 1);
+    
+    // 預設為只在有分數更新時繪製
     noLoop(); 
-    // 設定色彩模式：HSB (色相 0-360, 飽和度 0-100, 亮度 0-100, 透明度 0-100)
-    colorMode(HSB, 360, 100, 100, 100); 
-} 
+}
+
+// ... (Particle 和 Firework 類別保持不動) ...
 
 function draw() { 
     // 設定目標：答對 3 題時放煙火
