@@ -11,12 +11,10 @@ let scoreText = ""; // 顯示在畫布上的文字
 let fireworks = []; // 儲存所有煙火物件的陣列
 let fireworkLaunched = false; // 標記是否已啟動煙火動畫
 
-// =================================================================
-// 步驟一：模擬成績數據接收
-// -----------------------------------------------------------------
+// 宣告一個全域變數來儲存 p5.js canvas 元素
+let p5Canvas; 
 
-// ... (其他全域變數保持不動) ...
-
+// 請將這一段程式碼放在您的 `sketch.js` 中，緊接在全域變數宣告之後。
 window.addEventListener('message', function (event) {
     // 監聽來自 H5P iFrame 的分數結果
     const data = event.data;
@@ -24,21 +22,21 @@ window.addEventListener('message', function (event) {
     if (data && data.type === 'H5P_SCORE_RESULT') {
         
         // 更新全域分數變數
-        let finalScore = data.score; 
-        let maxScore = data.maxScore;
-        let scoreText = `答對題數: ${finalScore}/${maxScore}`;
+        finalScore = data.score; 
+        maxScore = data.maxScore;
+        // 根據要求，顯示為答對題數
+        scoreText = `答對題數: ${finalScore}/${maxScore}`;
         
-        // 重置煙火狀態
+        // 重置煙火狀態，以便新的分數可以觸發判斷
         fireworkLaunched = false; 
 
         console.log("新的分數已接收:", scoreText); 
         
-        // **實現要求二：成績完成後顯示 p5.js 畫面**
-        // 假設 p5.js 畫布的預設 ID 是 'defaultCanvas0'
-        const canvasElement = document.getElementById('defaultCanvas0');
-        if (canvasElement) {
+        // **!!! 關鍵程式碼：成績完成後顯示 p5.js 畫面 !!!**
+        // p5.js 畫布的預設 ID 是 'defaultCanvas0'，但如果使用 p5Canvas 變數更保險
+        if (p5Canvas && p5Canvas.elt) {
             // 將 canvas 設為可見 (覆蓋在 H5P 內容之上)
-            canvasElement.style.display = 'block';
+            p5Canvas.elt.style.display = 'block';
         }
         // ---------------------------------------------
         
@@ -53,12 +51,6 @@ window.addEventListener('message', function (event) {
 // =================================================================
 // 步驟二：p5.js 核心設定與繪圖
 // -----------------------------------------------------------------
-
-// =================================================================
-// 步驟二：p5.js 核心設定與繪圖
-// -----------------------------------------------------------------
-
-let p5Canvas; // 宣告一個全域變數來儲存 p5.js canvas 元素
 
 function setup() {
     // 獲取 H5P 容器的大小以決定 Canvas 大小
@@ -85,6 +77,7 @@ function setup() {
     // 預設為只在有分數更新時繪製
     noLoop(); 
 }
+
 
 // ... (Particle 和 Firework 類別保持不動) ...
 
