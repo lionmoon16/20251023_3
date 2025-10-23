@@ -3,9 +3,9 @@
 // -----------------------------------------------------------------
 
 // 全域變數：用於儲存 H5P 傳遞過來的成績
-let finalScore = 0; // 答對題數
-let maxScore = 0;   // 總題數
-let scoreText = ""; 
+let finalScore = 0; // 答對題數 (即 H5P 的 score)
+let maxScore = 0;   // 總題數 (即 H5P 的 maxScore)
+let scoreText = ""; // 顯示在畫布上的文字
 
 // 全域變數：用於煙火效果控制
 let fireworks = []; // 儲存所有煙火物件的陣列
@@ -20,6 +20,7 @@ window.addEventListener('message', function (event) {
         // 更新全域分數變數
         finalScore = data.score; 
         maxScore = data.maxScore;
+        // 根據要求，顯示為答對題數
         scoreText = `答對題數: ${finalScore}/${maxScore}`;
         
         // 重置煙火狀態，以便新的分數可以觸發判斷
@@ -50,7 +51,7 @@ function setup() {
 } 
 
 function draw() { 
-    // 煙火目標：答對 3 題
+    // 設定目標：答對 3 題時放煙火
     const FIREWORK_GOAL = 3;
     
     // 設定文字的基本屬性
@@ -58,23 +59,22 @@ function draw() {
 
 
     // -----------------------------------------------------------------
-    // A. 煙火特效的背景處理與動畫控制
+    // A. 煙火特效的背景處理與動畫控制 (觸發條件: finalScore === 3)
     // -----------------------------------------------------------------
     
-    // *** 關鍵修改：將觸發條件從百分比改為 finalScore === FIREWORK_GOAL ***
     if (finalScore === FIREWORK_GOAL && !fireworkLaunched) {
         // 第一次達成目標：啟動動畫循環
         loop(); 
         fireworkLaunched = true;
-        background(0, 0, 0, 100); // 黑色背景，亮度為 0
+        background(0, 0, 0, 100); // 黑色背景
         fireworks = []; // 清空舊的煙火
     } else if (finalScore !== FIREWORK_GOAL && fireworkLaunched) {
         // 分數不再是目標：停止動畫循環，重設為白色背景
         noLoop();
         fireworkLaunched = false;
-        background(0, 0, 100, 100); // 白色背景，亮度為 100
+        background(0, 0, 100, 100); // 白色背景
     } else if (finalScore === FIREWORK_GOAL) {
-        // 正在播放動畫：半透明黑色背景，產生拖影效果 (trail effect)
+        // 正在播放動畫：半透明黑色背景，產生拖影效果
         background(0, 0, 0, 10); 
     } else {
         // 一般情況：白色背景
@@ -90,7 +90,7 @@ function draw() {
     textSize(80); 
     
     if (finalScore === maxScore && finalScore > 0) {
-        // 滿分 (答對總題數)
+        // 答對總題數 (滿分)
         let hue = frameCount * 2 % 360; 
         fill(hue, 100, 100); 
         text("🎉 恭喜！全部答對！ 🎉", width / 2, height / 2 - 50);
@@ -99,12 +99,12 @@ function draw() {
         // 答對題數 >= 3 題 (目標達成)
         let hue = frameCount * 2 % 360; 
         fill(hue, 100, 100); 
-        text("🎉 目標達成！太棒了！ 🎉", width / 2, height / 2 - 50);
+        text("🎉 答對 3 題目標達成！ 🎉", width / 2, height / 2 - 50);
         
     } else if (finalScore > 0) {
-        // 有答對但未達成目標 (例如答對 1 或 2 題)
+        // 有答對但未達成目標 (0 < finalScore < 3)
         fill(50, 100, 90); // 黃色
-        text("成績良好，請再接再厲。", width / 2, height / 2 - 50);
+        text("成績良好，請繼續努力。", width / 2, height / 2 - 50);
         
     } else {
         // 答對 0 題
